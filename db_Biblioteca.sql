@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS tbl_editora(
 	nome_editora VARCHAR(50) NOT NULL
 );
 
-/*script de inserção de dados nas tabelas do banco (carga de dados para teste)*/
+/*script de inserção de dados nas tabelas do banco (carga e consultas de dados para teste)*/
 
 INSERT INTO tbl_autor(nome_autor, sobrenome_autor)
  VALUES
@@ -63,4 +63,66 @@ where id_livro > 2 or id_autor < 3;
 select * from tbl_livro
 where id_livro > 2 and not id_autor < 3;
 
+-- funções de agregação
 
+select count(*) as TotalAutores from tbl_autor;
+
+select count(distinct id_autor) as id_autor from tbl_autor;
+
+select max(preco_livro) as MaiorPreço from tbl_livro;
+
+select min(preco_livro) as Menorpreço from tbl_livro;
+
+select AVG(preco_livro) as MediaPreço from tbl_livro;
+
+select sum(preco_livro) as SomaPreços from tbl_livro;
+
+-- renomeando tabelas
+
+create table if not exists clientes(
+  id_cliente SMALLINT PRIMARY KEY auto_increment,
+  nome_cliente CHAR(20)
+); 
+
+insert into clientes(id_cliente, nome_cliente)
+  values
+  (20, 'carluxo'),
+  (23, 'bananinha'),
+  (30, 'gadiza');
+
+delete from tbl_cliente where id_cliente = '30';
+
+rename table clientes to tbl_cliente;
+
+select * from tbl_cliente;
+
+-- atualizar ou alterar registro
+
+update tbl_cliente
+set nome_cliente = 'bananão'
+where id_cliente = '30';
+ 
+ select * from tbl_livro;
+
+update tbl_livro
+set nome_livro = 'SSH, o shell seguro'
+where id_livro = '2';
+
+-- seleção de intervalos
+
+select * from tbl_livro
+where data_publicacao between '20040517' and '20110517';
+
+select nome_livro as Livros, preco_livro as Preços from tbl_livro
+where preco_livro between 40.00 and 60.00;
+
+-- LIKE e NOT LIKE padrão de caracter em filtro de consulta
+
+select nome_livro from tbl_livro
+where nome_livro like 'f%';
+
+select nome_livro from tbl_livro
+where nome_livro not like 's%';
+
+select nome_livro from tbl_livro
+where nome_livro like '_i%';

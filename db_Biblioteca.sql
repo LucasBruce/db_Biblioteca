@@ -36,7 +36,9 @@ INSERT INTO tbl_autor(nome_autor, sobrenome_autor)
  ('Mark', 'Sobell'),
  ('William', 'Stanek'),
  ('Richard', 'Blum');
-
+insert into tbl_autor(nome_autor, sobrenome_autor)
+ values
+ ('joao', 'pedro');
 INSERT INTO tbl_editora(nome_editora)
  VALUES
  ('Prentice Hall'),
@@ -126,3 +128,155 @@ where nome_livro not like 's%';
 
 select nome_livro from tbl_livro
 where nome_livro like '_i%';
+
+-- REGEXP - Expressões Regulares em consultas
+
+select nome_livro from tbl_livro
+where nome_livro regexp '^[FS]';
+
+select nome_livro from tbl_livro
+where nome_livro regexp '^[^FS]';
+
+select nome_livro from tbl_livro
+where nome_livro regexp '[ng]$';
+
+select nome_livro from tbl_livro
+where nome_livro regexp '^[FS]|Mi';
+
+-- como inserir valor padrão em uma coluna
+
+alter table tbl_autor modify column sobrenome_autor 
+varchar(60) default 'da silva';
+
+select * from tbl_autor;
+
+insert into tbl_autor(id_autor, nome_autor)
+  values
+  (6, 'joão');
+  
+insert into tbl_autor(id_autor, nome_autor, sobrenome_autor)
+  values
+  (7, 'Rita', 'de souza');
+
+ALTER TABLE tbl_autor MODIFY COLUMN sobrenome_autor VARCHAR(60);
+
+insert into tbl_autor(id_autor, nome_autor)
+  values
+  (8, 'jaiminho');
+  
+-- backup e restauração do banco comandos no terminal
+
+-- backup (mysqldump -u root -p db_Biblioteca > /home/bananinha/db_Biblioteca.sql)
+
+/*restauração lembrando que é preciso criar um banco e restaurar o arquivo de 
+backup nele (sudo mysql -u root -p db_banco < /home/lucas/db.Biblioteca.sql) */
+
+
+-- GROUP BY - Agrupamento de Registros
+
+select * from tbl_venda
+where produto = 'mouse';
+
+-- Consulta usando agragação para somar o total de vendas de mouse
+
+select sum(quantidade) as TotalMouse from tbl_venda
+where produto = 'mouse';
+
+-- Consulta totalizando as vendas de todos os produtos por cidade
+
+select cidade, sum(quantidade) as TotalProdutos from tbl_venda
+group by cidade;
+
+-- Consulta usando agregação total de registros de vendas por cidade
+select * from tbl_venda;
+select cidade, count(*) as Registros from tbl_venda
+group by cidade;
+
+-- MySQL - HAVING - Filtrando os resultados do Agrupamento - 27
+
+/*Consulta retornando total de vendas das cidades com menos de 2500 produtos vendidos*/
+select cidade, sum(quantidade) as total from tbl_venda
+group by cidade
+having total < 2500;
+
+/*Consulta retornando total de vendas do produto 'Teclado' das cidades com menos de 1500 
+teclados vendidos*/
+select cidade, sum(quantidade) as totalTeclados from tbl_venda
+where produto = 'Teclado'
+group by cidade
+having totalTeclados < 1500;
+
+-- MySQL - VIEWS - Criando Tabelas Virtuais (Visões) - 28
+
+create view vw_livrosAutores as select nome_livro as livro, nome_autor as autor
+from tbl_livro l
+inner join tbl_autor a
+on a.id_autor = l.id_autor;
+
+-- alter view
+alter view vw_livrosAutores as select tbl_livro.nome_livro as livro,
+tbl_autor.nome_autor as autor, tbl_livro.preco_livro as valor
+from tbl_livro 
+inner join tbl_autor 
+on tbl_autor.id_autor = tbl_livro.id_autor;
+
+select * from vw_livrosAutores
+order by valor;
+
+/*exclusão da view*/
+drop view vw_livrosAutores;
+ 
+select livro, autor from vw_livrosAutores;
+
+/*MySQL - INNER JOIN - Consultar dados em duas ou mais Tabelas - 29
+inner join e a interseção do um conjunto os só retornaram por meio do
+inner join se caso as tabelas envolvidas tiverem os dados se caso uma das
+tabelas não tiver registro não será retornado nem um dado*/
+
+select * from tbl_livro
+inner join tbl_autor
+on tbl_autor.id_autor = tbl_livro.id_autor;
+
+select tbl_livro.nome_livro, tbl_livro.isbn, 
+tbl_autor.nome_autor from tbl_livro
+inner join tbl_autor
+on tbl_autor.id_autor = tbl_livro.id_autor;
+
+select l.nome_livro as livro, e.nome_editora
+as editora from tbl_livro l
+inner join tbl_editora e
+on e.id_editora = l.id_editora
+where e.nome_editora like 'M%';
+
+select l.nome_livro as Livros, e.nome_editora as Editoras,
+a.nome_autor as Autores from tbl_livro l
+inner join tbl_editora e
+on e.id_editora = l.id_editora
+inner join tbl_autor a
+on a.id_autor = l.id_autor;
+
+/*MySQL - LEFT e RIGHT JOIN - Consultar dados em duas ou mais Tabelas - 30
+lembrando que a tabela principal será a tabela a esquerda ou direita left and right
+e não as segundarias*/
+
+select * from tbl_autor
+left join tbl_livro
+on tbl_autor.id_autor = tbl_livro.id_autor;
+
+select * from tbl_autor
+left join tbl_livro
+on tbl_autor.id_autor = tbl_livro.id_autor
+where tbl_livro.id_autor is null;
+
+select * from tbl_livro l
+right join tbl_editora e
+on l.id_editora = e.id_editora;
+
+select * from tbl_editora e
+right join tbl_livro l
+on l.id_livro = e.id_livro;
+
+select * from tbl_editora e
+left join tbl_livro l
+on e.id_editora = l.id_editora
+where l.id_editora is null;
